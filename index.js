@@ -10,40 +10,66 @@ app.use(express.static('build'))
 app.use(express.json())
 app.use(cors())
 
+const errorHandler = (error, request, response, next) => {
+  console.error(error.message)
+
+  if (error.name === "CastError") {
+    return response.status(400).send({error: "malformatted id"})
+    } else if (error.name === "ValidationError") {
+      return response.status(400).json({error:"Name must be unique and at least 3 characters long. Numbers must contain at least 8 characters."})
+    }
+    next(error)
+}
+
 morgan.token('body', (req) => JSON.stringify(req.body) )
 app.use(morgan(':method :url :status :res[content-length] - :response-time ms :body'))
 
 app.get('/api/persons', (request, response) => {
-    Contact.find({}).then(contacts => {
+    Contact.find({})
+    .then(contacts => {
       response.json(contacts)
+    })
+    .catch(error => {
+      console.log("Something went wrong getting the data")
+      next(error)
     })
 })
 
 
-app.get('/info', (req, res) => {
-  res.send(`
-  <p>Phonebook has info for ${persons.length} people</p>
-  <p>${new Date()}</p>`)
-})
-
+app.get('/info', (request, response) => {
+ 
+  Contact.count()
+  .then(maara => 
+    response.json(`Phonebook has info for ${maara} people     ${new Date()}`))
+  })
   
-app.get('/api/persons/:id', (request, response) => {
-    const id = Number(request.params.id)
-    const person = persons.find(person => person.id === id)
 
-    if (person) {
-        response.json(person)
-      } else {
-        response.status(404).end()
-      }
+
+
+ /* response.send(`
+  <p>Phonebook has info for ${maara)} people</p>
+  <p>${new Date()}</p>`)
+  */
+app.get('/api/persons/:id', (request, response, next) => {
+Contact.findById(request.params.id)
+.then(contact => {
+  if (contact) {
+    response.json(contact)
+  }
+  else {
+    response.status(404).end()
+  }
+})
+  .catch(error => next(error))
 })
 
 
 app.delete('/api/persons/:id', (request, response) => {
-    const id = Number(request.params.id)
-    persons = persons.filter(person => person.id !== id)
-    
-    response.status(204).end()
+    Contact.findByIdAndRemove(request.params.id)
+    .then(result => {
+      response.status(204).end()
+    })
+    .catch(error => next(error))
   })
 
   
@@ -58,40 +84,47 @@ app.delete('/api/persons/:id', (request, response) => {
 
 
 
-  app.post('/api/persons', (request, response) => {
+  app.post('/api/persons', (request, response, next) => {
     const person = request.body
 
-    if (!person.name) {
-      return response.status(400).json({ 
-        error: 'name is missing' 
-      })
-    }
-
-    if (!person.number) {
-      return response.status(400).json({
-        error: 'number is missing'
-      })
-    }
-
-    const names = persons.map(person => person.name.toLowerCase())
-    if (names.includes(person.name.toLowerCase())) {
-      return response.status(400).json({
-        error: 'name must be unique'
-      })
-    }
-
-    const contactData = {
+    const contact = new Contact({
       name: person.name,
       number: person.number,
-      id: generateId(),
-    }
-    //console.log(contactData)
-    persons = persons.concat(contactData)
-  
-    response.json(person)
+    })
+
+    console.log("contact" ,contact)
+    
+    contact.save()
+    .then(savedContact => {
+      response.json(savedContact)})
+    .catch(error => next(error.toJSON()))
   })
 
 
+
+app.put('/api/persons/:id', (request, response, next) => {
+  const person = request.body
+
+  const contact = {
+    name: person.name,
+    number: person.number,
+  }
+
+  Contact.findByIdAndUpdate(request.params.id, contact, {new: true})
+  .then(updatedContact => {
+    response.json(updatedContact)
+  })
+  .catch(error => next(error))
+})
+
+
+
+  const unknownEndpoint = (request, response) => {
+    response.status(404).send({ error: 'unknown endpoint' })
+  }
+
+app.use(unknownEndpoint)
+app.use(errorHandler)
 
 const PORT = process.env.PORT
   app.listen(PORT, () => {
