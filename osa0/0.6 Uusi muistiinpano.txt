@@ -1,0 +1,8 @@
+  
+note over selain:
+Selain luo uuden muistiinpanon ja
+piirtää näytön uudelleen uuden muistiinpanon kanssa.
+Sen jälkeen Selain lähettää palvelimelle
+uuden muistiinpanon JSON-merkkijonona (jotta uusikin muistiinpano tallentuisi palvelimelle).
+end note
+Selain->Palvelin: HTTP POST https://studies.cs.helsinki.fi/exampleapp/new_note_spa
