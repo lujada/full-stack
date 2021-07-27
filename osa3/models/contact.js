@@ -12,18 +12,18 @@ mongoose.connect(url, { useNewUrlParser: true, useUnifiedTopology: true, useFind
     console.log('error connecting to MongoDB:', error.message)
   })
 
-  const contactSchema = new mongoose.Schema({
-    name: {
-      type: String, 
-      minlength: 3, 
-      required: true,
-      unique: true},
-    number: {type: String, 
-      minlength: 8, 
-      required: true}
-  })
+const contactSchema = new mongoose.Schema({
+  name: {
+    type: String,
+    minlength: 3,
+    required: true,
+    unique: true },
+  number: { type: String,
+    minlength: 8,
+    required: true }
+})
 
-  contactSchema.plugin(uniqueValidator, { message: 'Error, expected {PATH} to be unique.' })
+contactSchema.plugin(uniqueValidator, { message: 'Error, expected {PATH} to be unique.' })
 
 contactSchema.set('toJSON', {
   transform: (document, returnedObject) => {

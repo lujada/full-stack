@@ -1,6 +1,6 @@
 const mongoose = require('mongoose')
 if (process.argv.length == 5) {
-  
+
   const password = process.argv[2]
   const name = process.argv[3]
   const number = process.argv[4]
@@ -20,7 +20,7 @@ if (process.argv.length == 5) {
 
   const contact = new Contact({
     name: name,
-    number: number, 
+    number: number,
   })
 
   contact.save().then(response => {
@@ -30,10 +30,10 @@ if (process.argv.length == 5) {
   })
 }
 
-  if (process.argv.length == 3) {
-    const password = process.argv[2]
+if (process.argv.length == 3) {
+  const password = process.argv[2]
 
-    const url =
+  const url =
   `mongodb+srv://fullstack:${password}@cluster0.b3tyt.mongodb.net/test?retryWrites=true&w=majority`
 
   mongoose.connect(url, { useNewUrlParser: true, useUnifiedTopology: true, useFindAndModify: false, useCreateIndex: true })
@@ -56,8 +56,8 @@ if (process.argv.length == 5) {
 
 
 
-  else {
-    console.log(process.argv.length)
+else {
+  console.log(process.argv.length)
 }
 
 /*
