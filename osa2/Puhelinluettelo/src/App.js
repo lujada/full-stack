@@ -1,26 +1,68 @@
 import React, { useState, useEffect } from 'react'
 import phonebookService from './services/persons'
 
-const Search = ({id, person, number, searchName, setPersons, persons}) => {
+//Notification message styles
+const RedNotification = ({ redMessage }) => {
+  if (redMessage === null) {
+    return null
+  }
+
+  return (
+    <div className="red">
+      {redMessage}
+    </div>
+  )
+}
+
+const GreenNotification = ({ greenMessage }) => {
+  if (greenMessage === null) {
+    return null
+  }
+
+  return (
+    <div className="green">
+      {greenMessage}
+    </div>
+  )
+}
+
+
+//Search -> display contacts
+const Search = ({id, person, number, searchName, setPersons, persons, setRedMessage, setGreenMessage}) => {
   const lowerName = person.toLowerCase()
   const searchLower = searchName.toLowerCase()
   const match = lowerName.includes(searchLower) 
   if (match === true) {return(
-    <DisplayContacts id={id} person={person} number={number} persons={persons} setPersons={setPersons} />)}
+    <DisplayContacts id={id} person={person} number={number} persons={persons} setPersons={setPersons} setRedMessage={setRedMessage} />)}
   else
     {return(null)}
 }
 
-const DisplayContacts = ({id, person, number, setPersons, persons}) => {
+const DisplayContacts = ({id, person, number, setPersons, persons, setRedMessage}) => {
 
   return(
     <div>{person} {number}
     <button onClick={() => {if (window.confirm(`Delete ${person}?`))
 
     {
-      phonebookService.remove(id)
-      .then(deleted => console.log('deleted'))
-      .then(setPersons(persons.filter(person => person.id !== id)))
+      phonebookService.remove(id) 
+      .then(deleted => {
+        setRedMessage(
+          `Removed ${person}`
+        )
+        setTimeout(() => {
+          setRedMessage(null)
+        }, 5000)
+        setPersons(persons.filter(person => person.id !== id))
+      } )
+      .catch(error => {
+        setRedMessage(
+          `Information of ${person} has already been removed from the server`
+        )
+        setTimeout(() => {
+          setRedMessage(null)
+        }, 5000)
+      })
     }
     }} >
     delete
@@ -29,6 +71,7 @@ const DisplayContacts = ({id, person, number, setPersons, persons}) => {
   )
 }
 
+//Component for the form with name & number
 const FormComponent = (props) => {
   return(
     <form onSubmit={props.addPerson}>
@@ -51,9 +94,11 @@ const App = () => {
   const [ newName, setNewName ] = useState('')
   const [ newNumber, setNewNumber] = useState('')
   const [ searchName, setSearchName] = useState('')
+  const [redMessage, setRedMessage] = useState(null)
+  const [greenMessage, setGreenMessage] = useState(null)
 
 
-
+//add contact and replace number
   const addPerson = (event) => {
     event.preventDefault()
     const personObject = {
@@ -70,6 +115,12 @@ const App = () => {
     {
       phonebookService.put(duplicate[0].id, personObject)
       .then(returnedContact => {
+        setGreenMessage(
+          `Replaced number of ${newName}`
+        )
+        setTimeout(() => {
+          setGreenMessage(null)
+        }, 5000)      
         setPersons(persons.map(person => person.id !== duplicate[0].id ? person : returnedContact))})
       setNewName('')
       setNewNumber('')
@@ -79,10 +130,23 @@ const App = () => {
     if (duplicate.length === 0) {
       phonebookService.create(personObject)
       .then(returnedContact => {
+        setGreenMessage(
+          `Added ${personObject.name}`
+        )
+        setTimeout(() => {
+          setGreenMessage(null)
+        }, 5000)
         setPersons(persons.concat(returnedContact))
+      } )
+      .catch(error => {
+        //console.log(error.response.data)
+        setRedMessage(`${error.response.data.error}`)
+        setTimeout(() => {
+          setRedMessage(null)
+        }, 5000)
+      })
         setNewName('')
         setNewNumber('')
-      })
     }
   }
 
@@ -111,8 +175,10 @@ const App = () => {
 
   return (
     <div>
-      <h2>Phonebook</h2>
-      
+      <h1>Phonebook</h1>
+      <RedNotification redMessage={redMessage} />
+      <GreenNotification greenMessage={greenMessage} />
+
 
       search: <input 
         value={searchName}
@@ -125,7 +191,7 @@ const App = () => {
       <h2>Numbers</h2>
       <ul>
       {persons.map(person => 
-        <Search key={person.id} id={person.id} person={person.name} number={person.number} searchName={searchName} persons={persons} setPersons={setPersons}/>)}
+        <Search key={person.id} id={person.id} person={person.name} number={person.number} searchName={searchName} persons={persons} setPersons={setPersons} setRedMessage={setRedMessage}/>)}
       </ul>
     </div>
   )
