@@ -20,11 +20,13 @@ const Display = ({matches}) => {
     if (matches.length === 1)
     {console.log('one result', matches[0].name)
     console.log('languages', matches[0].languages[0].name)
+	useEffect(() => {
     axios.get(`http://api.weatherstack.com/current?access_key=${api_key}&query=${matches[0].name}`)
     .then(res => {
       console.log(res, 'response')
       setWeather(res)
       })
+	}, [])
       console.log(weather, 'wetter')
     
     return(
