@@ -14,14 +14,35 @@ blogRouter.get('/', async (request, response) => {
     else {response.status(404).end()}
   })
   
-  blogRouter.post('/', (request, response) => {
-    const blog = new Blog(request.body)
+  blogRouter.post('/', async (request, response) => {
+    const body = request.body
   
-    blog
-      .save()
-      .then(result => {
-        response.status(201).json(result)
-      })
+    const blog = new Blog({
+      title: body.title,
+      author: body.author,
+      url: body.url,
+      likes: body.likes
+    })
+
+    const savedBlog = await blog.save()
+      response.json(savedBlog.toJSON())
+  })
+
+  blogRouter.delete('/:id', async (request, response, next) => {
+    await Blog.findByIdAndRemove(request.params.id)
+    response.status(204).end()
+  })
+
+  blogRouter.put('/:id', async (request, response, next) => {
+    const body = request.body
+    const blog = {
+      title: body.title,
+      author: body.author,
+      url: body.url,
+      likes: body.likes
+    }
+    await Blog.findByIdAndUpdate(request.params.id, blog, {new: true})
+    response.status(200).end()
   })
 
 module.exports = blogRouter
