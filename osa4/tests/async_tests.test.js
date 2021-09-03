@@ -3,8 +3,10 @@ const supertest = require('supertest')
 const helper = require('../utils/test_helper')
 const app = require('../app')
 const api = supertest(app)
+const bcrypt = require('bcrypt')
 
 const Blog = require('../models/blog')
+const User = require('../models/user')
 
 jest.setTimeout(50000)
 
@@ -123,7 +125,7 @@ test('Do not add blog without title or url', async () => {
         expect(blogsAfterPost).toHaveLength(helper.initialBlogs.length)
     
 })
-
+})
 describe('delete note', () => {
     test('deleting an existing blog', async () => {
         const blogsAtStart = await helper.blogsInDb()
@@ -140,7 +142,6 @@ describe('delete note', () => {
 
     expect(contents).not.toContain(blogToDelete.title)
     })
-})
 
 test('test updating a note', async () => {
     const blogsAtStart = await helper.blogsInDb()
@@ -157,11 +158,82 @@ test('test updating a note', async () => {
 
     expect(likes).toBe(5)
 
-
-
+})
 })
 
-afterAll(() =>
-mongoose.connection.close)
+describe('when there is initially one user in db', () => {
+    beforeEach(async () => {
+        await User.deleteMany({})
+       // await User.insertMany(helper.initialUsers)
+            
+    
+        const passwordHash = await bcrypt.hash('sekret', 10)
+        const user = new User({
+            username: 'root', passwordHash
+        }) 
+    
+        await user.save()
+    })
+    
+    test('creation succeeds with a new username', async () => {
+        const usersAtStart = await helper.usersInDb()
+    
+        const newUser = {
+            username: 'Spede',
+            name: 'Spede Pasanen',
+            password: 'salis'
+        }
+    
+    await api.post('/api/users')
+            .send(newUser)
+            .expect(200)
+            .expect('Content-Type', /application\/json/)
+    
+            const usersAtEnd = await helper.usersInDb()
+            expect(usersAtEnd).toHaveLength(usersAtStart.length +1)
+    
+            const usernames = usersAtEnd.map(u => u.username)
+            expect(usernames).toContain(newUser.username)
+    })
 
+    test('creation fails if password is too short', async () => {
+        const usersAtStart = await helper.usersInDb()
+
+    const newUser = {
+        username: 'Tynkä_salasana',
+        name: 'Pätkä',
+        password: 'ab'
+    }
+    await api.post('/api/users')
+    .send(newUser)
+    .expect(400)
+
+    usersAtEnd = await helper.usersInDb()
+
+    expect(usersAtStart).toHaveLength(usersAtEnd.length)
+
+    })
+
+    test('creation fails if username already exists', async () => {
+        const usersAtStart = await helper.usersInDb()
+
+        const newUser = {
+            username: 'root',
+            name: 'Illegal username',
+            password: 'whatever'
+        }
+
+        await api.post('/api/users')
+        .send(newUser)
+        .expect(400)
+
+        const usersAtEnd = await helper.usersInDb()
+
+        expect(usersAtEnd).toHaveLength(usersAtStart.length)
+    })
 })
+
+afterAll(() => {
+mongoose.connection.close()
+})
+
