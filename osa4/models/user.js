@@ -5,6 +5,12 @@ const userSchema = mongoose.Schema({
     username: {type: String, required: true, unique: true, min: 3},
     name: String,
     passwordHash: String,
+    blogs: [
+        {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: 'Blog'
+        }
+    ]
 })
 
 userSchema.plugin(uniqueValidator, {message: 'Error, username already exists'})

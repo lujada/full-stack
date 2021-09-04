@@ -1,9 +1,11 @@
 POST http://localhost:3003/api/blogs
 Content-Type: application/json
+Authorization: bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6IlRoZSBCbG9nbWFzdGVyIiwiaWQiOiI2MTMyNTk1ZGY0NjI3YzA2YThjODQ1NTMiLCJpYXQiOjE2MzA3Mzk4OTF9.DzjM7SxsfNXerhTv6-dWbJvFSzWModeokiPoUYOz8_s
 
 {
-    "title": "The Bloggers",
-    "author": "Masa",
-    "url": "www.blogors.edfe",
-    "likes": 10
+    "title": "The Blogster",
+    "author": "Spede Pasanen",
+    "url": "www.blogiosoite.com",
+    "likes": 10,
+    "userId": "6132595df4627c06a8c84553"
 }
