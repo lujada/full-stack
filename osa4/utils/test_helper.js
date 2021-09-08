@@ -25,7 +25,7 @@ const initialUsers = [
     {
         username: 'Spede',
         name: 'Spede Pasanen',
-        password: '123666'
+        password: 'asd123'
     }
 ]
 const blogsInDb = async () => {
@@ -40,6 +40,7 @@ const usersInDb = async () => {
 
 module.exports = {
     initialBlogs,
+    initialUsers,
     blogsInDb,
     usersInDb
 }

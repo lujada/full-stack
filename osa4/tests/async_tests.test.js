@@ -7,16 +7,41 @@ const bcrypt = require('bcrypt')
 
 const Blog = require('../models/blog')
 const User = require('../models/user')
+const loginRouter = require('../controllers/login')
 
 jest.setTimeout(50000)
 
 beforeEach(async () => {
     await Blog.deleteMany({})
     await Blog.insertMany(helper.initialBlogs)
+    await User.deleteMany({})
+    await User.insertMany(helper.initialUsers)
+
+    
+    const saltRounds = 10
+    const passwordHash = await bcrypt.hash("asd123", saltRounds)
+
+    const createUser = new User({
+        username: "Login Tester",
+        name: "Testmaster",
+        passwordHash
+    })
+    await createUser.save()
+
+    loginTestuser = await api.post('/api/login')
+    .send({
+        username: "Login Tester",
+        password: "asd123"
+    }) 
+   // console.log(loginTestuser.body, "response")
+
+
+
+
 })
 
 
-describe('tests with async', () => {
+describe('testing of blogs', () => {
 test('get all blogs', async () => {
     await api
     .get('/api/blogs')
@@ -39,13 +64,17 @@ test('return id', async () => {
 })
 
 test('post new blog', async () => {
+
     const newBlog = {
     title: 'testBlog',
     author: 'Blog Writer',
     url: 'www.testingblog.com',
-    likes: 10
+    likes: 10,
+    user: loginTestuser.body.id
     }
+
     await api.post('/api/blogs')
+    .auth(loginTestuser.body.token, {type: 'bearer'})
     .send(newBlog)
     .expect(200)
 
@@ -65,6 +94,7 @@ test('change no likes to 0', async () => {
         likes: null
         }
         await api.post('/api/blogs')
+        .auth(loginTestuser.body.token, {type: 'bearer'})
         .send(newBlog)
         .expect(200)
 
@@ -82,6 +112,7 @@ test('do not add blog without title', async () => {
         likes: 5
         }
         await api.post('/api/blogs')
+        .auth(loginTestuser.body.token, {type: 'bearer'})
         .send(newBlog)
         .expect(400)
 
@@ -99,6 +130,7 @@ test('Do not add blog without url', async () => {
         likes: 5
         }
         await api.post('/api/blogs')
+        .auth(loginTestuser.body.token, {type: 'bearer'})
         .send(newBlog)
         .expect(400)
 
@@ -117,6 +149,7 @@ test('Do not add blog without title or url', async () => {
         }
         await api.post('/api/blogs')
         .send(newBlog)
+        .auth(loginTestuser.body.token, {type: 'bearer'})
         .expect(400)
 
         
@@ -125,18 +158,56 @@ test('Do not add blog without title or url', async () => {
         expect(blogsAfterPost).toHaveLength(helper.initialBlogs.length)
     
 })
-})
-describe('delete note', () => {
-    test('deleting an existing blog', async () => {
-        const blogsAtStart = await helper.blogsInDb()
-        const blogToDelete = blogsAtStart[0]
 
+test('Unauthorized request will not be added', async () => {
+    const blogsAtStart = await helper.blogsInDb()
+
+    const newBlog = {
+        title: 'testBlog',
+        author: 'Blog Writer',
+        url: 'www.testingblog.com',
+        likes: 10,
+        user: loginTestuser.body.id
+        }
+
+    await api.post('/api/blogs')
+    .send(newBlog)
+    .auth('Not a valid token', {type: 'bearer'})
+    .expect(401)
+    
+    const blogsAfterPost = await helper.blogsInDb()
+
+    expect(blogsAfterPost).toHaveLength(blogsAtStart.length)
+
+
+})
+
+})
+describe('delete and update note', () => {
+    test('deleting an existing blog', async () => {
+        const blogForDeletion =
+        {
+            title: 'blogToDelete',
+            author: 'Blog Writer',
+            url: 'www.testingblog.com',
+            likes: 8,
+            user: loginTestuser.body.id
+            }
+        
+        await api.post('/api/blogs')
+        .send(blogForDeletion)
+        .auth(loginTestuser.body.token, {type: 'bearer'})
+
+
+       const allBlogs = await helper.blogsInDb()
+        const blogToDelete = allBlogs[2]
         await api.delete(`/api/blogs/${blogToDelete.id}`)
+        .auth(loginTestuser.body.token, {type: 'bearer'})
         .expect(204)
 
     const blogsAtEnd = await helper.blogsInDb()
 
-    expect(blogsAtEnd).toHaveLength(helper.initialBlogs.length -1)
+    expect(blogsAtEnd).toHaveLength(allBlogs.length -1)
 
     const contents = blogsAtEnd.map(blogs => blogs.title)
 
@@ -161,27 +232,15 @@ test('test updating a note', async () => {
 })
 })
 
-describe('when there is initially one user in db', () => {
-    beforeEach(async () => {
-        await User.deleteMany({})
-       // await User.insertMany(helper.initialUsers)
-            
-    
-        const passwordHash = await bcrypt.hash('sekret', 10)
-        const user = new User({
-            username: 'root', passwordHash
-        }) 
-    
-        await user.save()
-    })
-    
+describe('when there are users in db', () => {
+
     test('creation succeeds with a new username', async () => {
         const usersAtStart = await helper.usersInDb()
     
         const newUser = {
-            username: 'Spede',
-            name: 'Spede Pasanen',
-            password: 'salis'
+            username: 'The tester',
+            name: 'Testmaster',
+            password: 'asd123'
         }
     
     await api.post('/api/users')
@@ -218,7 +277,7 @@ describe('when there is initially one user in db', () => {
         const usersAtStart = await helper.usersInDb()
 
         const newUser = {
-            username: 'root',
+            username: 'Sakke',
             name: 'Illegal username',
             password: 'whatever'
         }
