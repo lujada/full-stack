@@ -76,7 +76,7 @@ test('post new blog', async () => {
     await api.post('/api/blogs')
     .auth(loginTestuser.body.token, {type: 'bearer'})
     .send(newBlog)
-    .expect(200)
+    .expect(201)
 
     const blogsAfterPost = await helper.blogsInDb()
 
@@ -96,7 +96,7 @@ test('change no likes to 0', async () => {
         await api.post('/api/blogs')
         .auth(loginTestuser.body.token, {type: 'bearer'})
         .send(newBlog)
-        .expect(200)
+        .expect(201)
 
         const blogsAfterPost = await helper.blogsInDb()
 

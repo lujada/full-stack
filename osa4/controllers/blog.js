@@ -17,46 +17,52 @@ blogRouter.get('/', async (request, response) => {
     else {response.status(404).end()}
   })
   
-  blogRouter.post('/', userExtractor, async (request, response) => {
-    const body = request.body
+  blogRouter.post('/', userExtractor, async (request, response, next) => {
 
-    const decodedToken = jwt.verify(request.token, process.env.SECRET)
-    if (!decodedToken || !decodedToken.id) {
-      return response.status(401).json({error: 'token missing or invalid'})
-    }
+      const blog = new Blog(request.body)
     
-    const user = request.user 
-  
-    const blog = new Blog({
-      title: body.title,
-      author: body.author,
-      url: body.url,
-      likes: body.likes,
-      user: user._id
+      const decodedToken = jwt.verify(request.token, process.env.SECRET)
+    
+      if (!request.token || !decodedToken.id) {
+        return response.status(401).json({ error: 'token missing or invalid' })
+      }
+    
+      const user = await User.findById(decodedToken.id)
+    
+      if (!blog.url || !blog.title) {
+        return response.status(400).send({ error: 'title or url missing ' })
+      }
+    
+      if (!blog.likes) {
+        blog.likes = 0
+      }
+    
+      blog.user = user
+      const savedBlog = await blog.save()
+    
+      user.blogs = user.blogs.concat(savedBlog._id)
+      await user.save()
+    
+      response.status(201).json(savedBlog)
     })
-
-    const savedBlog = await blog.save()
-    user.blogs = user.blogs.concat(savedBlog._id)
-    await user.save()
-      response.json(savedBlog.toJSON())
-  })
 
   blogRouter.delete('/:id', 
   userExtractor, async (request, response, next) => {
 
     const decodedToken = jwt.verify(request.token, process.env.SECRET)
-
-    const user = request.user
     
     if (!decodedToken || !decodedToken.id) {
       return response.status(401).json({error: 'token missing or invalid'})
     }
 
+    const user = await User.findById(decodedToken.id)
     const blog = await Blog.findById(request.params.id)
 
     if (blog.user.toString() === user.id.toString() ) {
 
-    await Blog.findByIdAndRemove(request.params.id)
+    await blog.remove()
+    user.blogs = user.blogs.filter(b => b.id.toString() !== request.params.id.toString())
+    await user.save()
     response.status(204).end()
     }
 
@@ -64,15 +70,10 @@ blogRouter.get('/', async (request, response) => {
   })
 
   blogRouter.put('/:id', async (request, response, next) => {
-    const body = request.body
-    const blog = {
-      title: body.title,
-      author: body.author,
-      url: body.url,
-      likes: body.likes
-    }
-    await Blog.findByIdAndUpdate(request.params.id, blog, {new: true})
-    response.status(200).end()
+    const blog = request.body
+
+    const updatedBlog = await Blog.findByIdAndUpdate(request.params.id, blog, {new: true})
+    response.json(updatedBlog.toJSON())
   })
 
 module.exports = blogRouter
