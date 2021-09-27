@@ -29,13 +29,10 @@ const remove = async (id) => {
   const config = {
     headers: { Authorization: token },
   }
-  console.log(config, "config")
-  const response = await axios.delete(`${baseUrl}/${id}`, config)
-  console.log(response.data)
+  await axios.delete(`${baseUrl}/${id}`, config)
 }
 
-// eslint-disable-next-line import/no-anonymous-default-export
-export default { 
+export default {
   getAll: getAll,
   create: create,
   setToken: setToken,

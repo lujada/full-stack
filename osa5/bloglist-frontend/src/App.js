@@ -19,7 +19,7 @@ const App = () => {
   useEffect(() => {
     blogService.getAll().then(blogs =>
       setBlogs( blogs )
-    )  
+    )
   }, [])
 
   useEffect(() => {
@@ -31,10 +31,9 @@ const App = () => {
     }
   }, [])
 
-
   const handleLogin = async (event) => {
     event.preventDefault()
-    
+
     try {
       const user = await loginService.login({
         username,
@@ -42,7 +41,7 @@ const App = () => {
       })
 
 
-    blogService.setToken(user.token)
+      blogService.setToken(user.token)
       window.localStorage.setItem(
         'loggedBlogappUser', JSON.stringify(user)
       )
@@ -56,111 +55,112 @@ const App = () => {
         setErrorMessage(null)
       }, 5000)
     }
-      }
+  }
 
-  const handleLogout = async (event) => {
+  const handleLogout = async () => {
     window.localStorage.removeItem('loggedBlogappUser')
     window.location.reload(false)
   }
 
   const loginForm = () => {
     return(
-    <Togglable buttonLabel="log in">
-    <LoginForm 
+      <Togglable buttonLabel="log in">
+        <LoginForm
           username={username}
           password={password}
           handleUsernameChange={({ target }) => setUsername(target.value)}
-          handlePasswordChange={({ target }) => setPassword(target.value)} 
+          handlePasswordChange={({ target }) => setPassword(target.value)}
           handleSubmit={handleLogin}
-          />
-          </Togglable>
-  )}
+        />
+      </Togglable>
+    )}
 
-//Order blogs by likes
+  //Order blogs by likes
   const byLikes = (a, b) => {
     return parseInt(b.likes) - parseInt(a.likes)
   }
-    let sortedBlogs = [...blogs]
-    sortedBlogs.sort(byLikes)
+  let sortedBlogs = [...blogs]
+  sortedBlogs.sort(byLikes)
 
-//Map blogs for display
-    const blogMapper = () => (
-      sortedBlogs.map(blog =>
-        <Blog key={blog.id} blog={blog} updateBlog={updateBlog} removeBlog={removeBlog} user={user.name} />
-      )
+  //Map blogs for display
+  const blogMapper = () => (
+    sortedBlogs.map(blog =>
+      <Blog key={blog.id} blog={blog} updateBlog={updateBlog} removeBlog={removeBlog} user={user.name} />
+    )
   )
 
 
   const addBlog = (blogObject) => {
     blogFormRef.current.toggleVisibility()
     blogService.create(blogObject)
-    .then(returnedBlog => {
-      setBlogs(blogs.concat(returnedBlog))
-      setMessage(`A new blog ${blogObject.title} by ${blogObject.author} added`)
-      setTimeout(() => {
-        setMessage(null)
-      }, 5000)
 
-    })
+      .then(returnedBlog => {
+        setBlogs(blogs.concat(returnedBlog))
+        setMessage(`A new blog ${blogObject.title} by ${blogObject.author} added`)
+        setTimeout(() => {
+          setMessage(null)
+        }, 5000)
+
+      })
   }
 
   const updateBlog = (blogObject, id) => {
     blogService.update(blogObject, id)
-    .then(returnedBlog => {
-      setBlogs(blogs.map(blog => blog.id !== id ? blog : returnedBlog))
-    })
+      .then(returnedBlog => {
+        setBlogs(blogs.map(blog => blog.id !== id ? blog : returnedBlog))
+      })
   }
 
   const removeBlog = (id) => {
     blogService.remove(id, user.token)
-    .then(setBlogs(blogs.filter(blog => blog.id !== id))
-    )
+      .then(setBlogs(blogs.filter(blog => blog.id !== id))
+      )
   }
 
   const blogForm = () => {
+    return(
+      <Togglable buttonLabel="Create new blog" ref={blogFormRef}>
+        <BlogForm createBlog={addBlog} />
+      </Togglable>
+    )}
+
+  const ErrorNotification = ({ message }) => {
+    if (message === null) {
+      return null
+    }
+    return(
+      <div className="error">
+        {message}
+      </div>
+    )
+  }
+
+  const GreenNotification = ({ message }) => {
+    if (message === null) {
+      return null
+    }
+    return(
+      <div className="green">
+        {message}
+      </div>
+    )
+  }
+
+  //Display
   return(
-    <Togglable buttonLabel="Create new blog" ref={blogFormRef}>
-    <BlogForm createBlog={addBlog} />
-  </Togglable>
-  )}
+    <div>
+      <ErrorNotification message={errorMessage}/>
+      <GreenNotification message={message}/>
 
-    const ErrorNotification = ({message}) => {
-      if (message === null) {
-        return null
-      }
-      return(
-        <div className="error">
-          {message}
-        </div>
-      )
-    }
+      {user === null
+        ? <h1>Login to application</h1> : null}
 
-    const GreenNotification = ({message}) => {
-      if (message === null) {
-        return null
-      }
-      return(
-        <div className="green">
-          {message}
-        </div>
-      )
-    }
-
-//Display
-      return(
-        <div>
-          <ErrorNotification message={errorMessage}/>
-          <GreenNotification message={message}/>
-
-          {user === null
-          ? <h1>Login to application</h1> : null}
-
-          {user === null 
-          ? loginForm()
+      {user === null
+        ? loginForm()
         :
-          <div>
+        <div>
           <h1>Blogs</h1>
-          <p>{user.username} logged in</p> 
+          <p>{user.username} logged in</p>
 
           <button onClick={handleLogout}>
           Logout
@@ -168,12 +168,11 @@ const App = () => {
           <p></p>
 
           {blogForm()}
-          {blogMapper()}         
-          </div>}
-        </div>
-      )
+          {blogMapper()}
+        </div>}
+    </div>
+  )
 
 }
-      
 
 export default App

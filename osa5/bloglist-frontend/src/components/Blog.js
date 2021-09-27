@@ -1,6 +1,6 @@
-import React, {useState} from 'react'
+import React, { useState } from 'react'
 
-const Blog = ({blog, updateBlog, removeBlog, user}) => {
+const Blog = ({ blog, updateBlog, removeBlog, user }) => {
   const blogStyle = {
     paddingTop: 10,
     paddingLeft: 2,
@@ -10,7 +10,7 @@ const Blog = ({blog, updateBlog, removeBlog, user}) => {
   }
 
   const [showAll, setShowAll] = useState(false)
-  
+
   const toggleShowAll = () => {
     setShowAll(!showAll)
   }
@@ -20,7 +20,6 @@ const Blog = ({blog, updateBlog, removeBlog, user}) => {
 
     blog.likes = blog.likes +1
     blog.user = blog.user.id
-
     updateBlog(blog, blog.id)
   }
 
@@ -28,46 +27,44 @@ const Blog = ({blog, updateBlog, removeBlog, user}) => {
     if (window.confirm(`Remove ${blog.title} by ${blog.author}?`))
     {removeBlog(blog.id)}
   }
-
   return(
-  <div style={blogStyle}>
+    <div style={blogStyle} className='blog'>
 
-    {showAll ?
-    <div>
-    {blog.title} {blog.author}
-    <button onClick={toggleShowAll}>
+      {showAll ?
+        <div>
+          {blog.title} {blog.author}
+          <button onClick={toggleShowAll}>
     hide
-    </button>
-    <div>
-    {blog.url}
-    </div>
-    <div>
+          </button>
+          <div>
+            {blog.url}
+          </div>
+          <div>
       likes: {blog.likes}
-      <button onClick={updateLikes}>
+            <button onClick={updateLikes}>
         like
-      </button>
-    </div>
-    <div>
-      {blog.user.name}
-      </div>
+            </button>
+          </div>
+          <div>
+            {blog.user.name}
+          </div>
 
-{ user === blog.user.name ?
-    <button onClick={eraseBlog}>
+          { user === blog.user.name ?
+            <button onClick={eraseBlog}>
       remove
-    </button>
-    : ''
-    }
-    </div>
-    : 
-    <div>
-      {blog.title} {blog.author}
+            </button>
+            : ''
+          }
+        </div>
+        :
+        <div>
+          {blog.title} {blog.author}
 
-    <button onClick={toggleShowAll}>
+          <button onClick={toggleShowAll}>
     show
-    </button>
-    </div> 
-    }
-  </div>  
-  
+          </button>
+        </div>
+      }
+    </div>
   )}
 export default Blog
