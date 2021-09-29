@@ -3,8 +3,6 @@ import '@testing-library/jest-dom/extend-expect'
 import { render, fireEvent } from '@testing-library/react'
 import Blog from './Blog'
 
-/* eslint-disable */
-
 describe('<Blog/> display tests', () => {
 
   const blog = {
@@ -66,8 +64,7 @@ describe('<Blog/> display tests', () => {
 
     const likeButton = component.getByText('like')
     fireEvent.click(likeButton)
-    
-})
+  })
 
 
 
