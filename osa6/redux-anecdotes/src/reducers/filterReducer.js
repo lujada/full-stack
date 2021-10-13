@@ -3,17 +3,16 @@
 const filterReducer = (state = [], action) => {
     switch (action.type) {
         case 'FILTER':
-           const matches = action.data.matches
-           console.log(matches, 'matches in redux')
-            return matches
+           const search = action.data.search
+            return search
     }
     return state
 }
 
-export const filter = (matches) => {
+export const filter = (search) => {
     return {
         type: 'FILTER',
-        data: { matches }
+        data: { search }
     }
 }
 

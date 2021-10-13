@@ -3,14 +3,10 @@ import { useSelector, useDispatch } from 'react-redux'
 import { filter } from '../reducers/filterReducer'
 
 const Filter = () => {
-    const anecdotes = useSelector(state => state.anecdotes)
     const dispatch = useDispatch()
-
     const handleChange = (event) => {
-        let search = event.target.value
-        const matches = anecdotes.filter(anecdote => 
-            anecdote.content.toLowerCase().includes(search.toLowerCase()))
-        dispatch(filter(matches))
+          let search = event.target.value
+          dispatch(filter(search.toLowerCase()))
   }
   const style = {
     marginBottom: 10

@@ -8,7 +8,7 @@ import filterReducer from './filterReducer'
 const reducer = combineReducers({
   anecdotes: anecdoteReducer,
   message: notificationReducer,
-  matches: filterReducer
+  search: filterReducer
 })
 
 const store = createStore(reducer, composeWithDevTools())

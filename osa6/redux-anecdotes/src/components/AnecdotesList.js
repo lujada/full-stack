@@ -6,12 +6,9 @@ import { emptyNotification, voteNotification } from '../reducers/notificationRed
 
 const AnecdotesList = () => {
 
-    const searchResults = useSelector(state => state.matches)
+    const search = useSelector(state => state.search)
     const anecdotes = useSelector(state => state.anecdotes)
     const dispatch = useDispatch()
-
-    console.log('anecdotes', anecdotes)
-    console.log('searchResults', searchResults)
 
     const byLikes = (a, b) => {
       return parseInt(b.votes - a.votes)
@@ -19,6 +16,10 @@ const AnecdotesList = () => {
 
     let sortedAnecdotes = [...anecdotes]
     sortedAnecdotes.sort(byLikes)
+
+    let matches = sortedAnecdotes.filter(anecdote =>
+      anecdote.content.toLowerCase().includes(search)
+    )  
 
     const voteAnecdote = (props) => {
       dispatch(addVote(props[0]))
@@ -34,7 +35,7 @@ const AnecdotesList = () => {
     
   return (
     <div>
-      {searchResults.length === 0 
+      {search.length === 0 
       ?
       sortedAnecdotes.map(anecdote =>
         <div key={anecdote.id}>
@@ -47,7 +48,7 @@ const AnecdotesList = () => {
           </div>
         </div>) 
         :
-        searchResults.map(anecdote =>
+        matches.map(anecdote =>
           <div key={anecdote.id}>
             <div>
               {anecdote.content}
