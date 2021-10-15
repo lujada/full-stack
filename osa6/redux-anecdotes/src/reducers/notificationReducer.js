@@ -4,15 +4,11 @@ const notificationReducer = (state= initialState, action) => {
 
     switch (action.type) {
         case 'VOTE_MESSAGE':
-            const voteNotification = action.data.notification
-            return `You voted "${voteNotification}"`
+            const voteNotification = action.data
+            return voteNotification
         
         case 'EMPTY':
-            return null
-
-        case 'ADD_ANECDOTE_MESSAGE':
-            const anecdoteNotification = action.data.notification
-            return `Anecdote "${anecdoteNotification}" created`
+            return action.data
             
         default:
             return state
@@ -20,26 +16,25 @@ const notificationReducer = (state= initialState, action) => {
 
 }
 
-export const voteNotification = notification => {
-    return { 
-        type: 'VOTE_MESSAGE',
-        data: { notification }
+export const setNotification = (notification, time) => {
+    return async (dispatch) => {
+        dispatch({
+            type: 'VOTE_MESSAGE',
+            data: notification
+        })
+        dispatch(emptyNotification(time))
     }
 }
 
-export const emptyNotification = () => {
-    return {
+export const emptyNotification = (time) => {
+    return async (dispatch) => {
+        setTimeout(() => {
+    dispatch({
         type: 'EMPTY',
         data: null
-    }
+    })
+}, time * 1000)
 }
-
-export const anecdoteNotification = notification => {
-    return {
-        type: 'ADD_ANECDOTE_MESSAGE',
-        data: { notification },
-    }
 }
-
 
 export default notificationReducer
