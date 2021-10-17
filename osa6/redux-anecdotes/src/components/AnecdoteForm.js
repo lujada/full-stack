@@ -1,28 +1,41 @@
 import React from 'react'
-import {  useDispatch } from 'react-redux'
+import { connect } from 'react-redux'
 import {  newAnecdote } from '../reducers/anecdoteReducer'
-import { setNotification, emptyNotification } from '../reducers/notificationReducer'
+import { setNotification } from '../reducers/notificationReducer'
 
-const AnecdoteForm = () => {
-    const dispatch = useDispatch()
+const AnecdoteForm = (props) => {
 
-    const addAnecdote = async (event) => {
-        event.preventDefault()
-        const content = event.target.anecdote.value
-        event.target.anecdote.value = ''
-        dispatch(newAnecdote(content))
-        dispatch(setNotification(`Created anecdote "${content}"`, 10))
-    }
+  const addAnecdote = async (event) => {
+    event.preventDefault()
+    const content = event.target.anecdote.value
+    event.target.anecdote.value = ''
+    props.newAnecdote(content)
+    props.setNotification(`Created anecdote "${content}"`, 10)
+  }
 
         
-    return (
-        <div>
-            <h2>create new</h2>
-    <form onSubmit={addAnecdote}>
+  return (
+    <div>
+      <h2>create new</h2>
+      <form onSubmit={addAnecdote}>
         <div><input name="anecdote" /></div>
         <button type="submit">create</button>
       </form>
-      </div>
-    )}
+    </div>
+  )}
 
-    export default AnecdoteForm
+const mapStateToProps = (state) => {
+  return {
+    anecdotes: state.anecdotes
+  }
+}
+    
+const mapDispatchToProps = {
+  setNotification,
+  newAnecdote
+}
+    
+export default connect(
+  mapStateToProps,
+  mapDispatchToProps
+)(AnecdoteForm)
