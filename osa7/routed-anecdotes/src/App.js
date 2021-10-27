@@ -1,6 +1,6 @@
 import React, { useState } from 'react'
-import { __SECRET_INTERNALS_DO_NOT_USE_OR_YOU_WILL_BE_FIRED } from 'react'
 import { BrowserRouter as Router, Switch, Route, Link, useParams, useHistory } from  'react-router-dom'
+import { useField } from './hooks/index'
 
 const Menu = () => {
   const padding = {
@@ -64,44 +64,50 @@ const Footer = () => (
 
 const CreateNew = (props) => {
   const history = useHistory()
-  const [content, setContent] = useState('')
-  const [author, setAuthor] = useState('')
-  const [info, setInfo] = useState('')
 
+  const {reset: resetCont, ...content} = useField('text')
+  const {reset: resetAut, ...author} = useField('text')
+  const {reset: resetInf, ...info} = useField('text')
 
   const handleSubmit = (event) => {
     event.preventDefault()
-    props.addNew({
-      content,
-      author,
-      info,
-      votes: 0
-    })
 
-    setContent('')
-    setAuthor('')
-    setInfo('') 
+    props.addNew({
+      content: content.value,
+      author: author.value,
+      info: info.value,
+      votes: 0
+    }) 
 
     history.push('/')
+  }
+
+  const resetFields = (event) => {
+    event.preventDefault()
+
+    resetCont(event)
+    resetAut(event)
+    resetInf(event)
   }
 
   return (
     <div>
       <h2>create a new anecdote</h2>
-      <form onSubmit={handleSubmit}>
+      <form id="createAnecdoteForm">
         <div>
-          content
-          <input name='content' value={content} onChange={(e) => setContent(e.target.value)} />
+        content
+        <input name='test' {...content} />
         </div>
         <div>
-          author
-          <input name='author' value={author} onChange={(e) => setAuthor(e.target.value)} />
+        author
+        <input {...author} />
         </div>
         <div>
-          url for more info
-          <input name='info' value={info} onChange={(e)=> setInfo(e.target.value)} />
+        url for more info
+        <input {...info} />
         </div>
-        <button>create</button>
+        <button onClick={handleSubmit}>create</button>
+        <button onClick={resetFields}> reset </button>
       </form>
     </div>
   )
@@ -126,6 +132,8 @@ const App = () => {
       id: '2'
     }
   ])
+
+  console.log(anecdotes)
 
   const [notification, setNotification] = useState('')
 
