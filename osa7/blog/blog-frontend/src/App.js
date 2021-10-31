@@ -5,26 +5,34 @@ import Blog from './components/Blog'
 import blogService from './services/blogs'
 import loginService from './services/login'
 import LoginForm from './components/loginForm'
-import BlogForm from './components/blogForm'
+//import BlogForm from './components/blogForm'
 import Togglable from './components/Togglable'
 import { setNotification } from './reducers/notificationReducer'
 import NotificationRedux from './components/NotificationRedux'
+import { initializeBlogs } from './reducers/blogReducer'
+import BlogFormRedux from './components/blogFormRedux'
 
 const App = () => {
   const dispatch = useDispatch()
 
-  const [blogs, setBlogs] = useState([])
+  //get blogs
+  useEffect(() => {
+    dispatch(initializeBlogs())
+  }, [])
+
+  //sort blogs by likes
+  const byLikes = (a, b) => {
+    return parseInt(b.likes) - parseInt(a.likes)
+  }
+  const blogs = useSelector(state => 
+    state.blogs.sort(byLikes)
+  )
+
   const [username, setUsername] = useState('')
   const [password, setPassword] = useState('')
   const [user, setUser] = useState(null)
 
   const blogFormRef = useRef()
-
-  useEffect(() => {
-    blogService.getAll().then(blogs =>
-      setBlogs( blogs )
-    )
-  }, [])
 
   useEffect(() => {
     const loggedUserJSON = window.localStorage.getItem('loggedBlogappUser')
@@ -76,30 +84,12 @@ const App = () => {
       </Togglable>
     )}
 
-  //Order blogs by likes
-  const byLikes = (a, b) => {
-    return parseInt(b.likes) - parseInt(a.likes)
-  }
-  let sortedBlogs = [...blogs]
-  sortedBlogs.sort(byLikes)
-
   //Map blogs for display
   const blogMapper = () => (
-    sortedBlogs.map(blog =>
+    blogs.map(blog =>
       <Blog key={blog.id} blog={blog} updateBlog={updateBlog} removeBlog={removeBlog} user={user.name} />
     )
   )
-
-
-  const addBlog = (blogObject) => {
-    blogFormRef.current.toggleVisibility()
-    blogService.create(blogObject)
-
-      .then(returnedBlog => {
-        setBlogs(blogs.concat(returnedBlog))
-        dispatch(setNotification(`A new blog ${blogObject.title} by ${blogObject.author} added`, 'green'))
-      })
-  }
 
   const updateBlog = (blogObject, id) => {
     blogService.update(blogObject, id)
@@ -118,7 +108,7 @@ const App = () => {
   const blogForm = () => {
     return(
       <Togglable buttonLabel="Create new blog" ref={blogFormRef}>
-        <BlogForm createBlog={addBlog} />
+        <BlogFormRedux />
       </Togglable>
     )}
 
