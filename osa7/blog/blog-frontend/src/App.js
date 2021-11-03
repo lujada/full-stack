@@ -1,26 +1,36 @@
 /*eslint-disable*/
 import React, { useState, useEffect, useRef } from 'react'
 import { useSelector, useDispatch } from 'react-redux'
-import Blog from './components/Blog'
+//import Blog from './components/Blog'
+import BlogRedux from './components/BlogRedux'
 import blogService from './services/blogs'
 import loginService from './services/login'
 import LoginForm from './components/loginForm'
 //import BlogForm from './components/blogForm'
 import Togglable from './components/Togglable'
 import { setNotification } from './reducers/notificationReducer'
-import NotificationRedux from './components/NotificationRedux'
 import { initializeBlogs } from './reducers/blogReducer'
+import { logIn, logOut } from './reducers/loginReducer'
+import { initializeUsers } from './reducers/userReducer'
+import NotificationRedux from './components/NotificationRedux'
 import BlogFormRedux from './components/blogFormRedux'
+import { BrowserRouter as Router, Switch, Route, Link } from 'react-router-dom'
+import Users from './components/Users'
 
 const App = () => {
   const dispatch = useDispatch()
 
-  //get blogs
+  //initialize blogs
   useEffect(() => {
     dispatch(initializeBlogs())
   }, [])
 
-  //sort blogs by likes
+  useEffect(() => {
+    dispatch(initializeUsers())
+  }, [])
+
+
+  // get blogs and sort by likes
   const byLikes = (a, b) => {
     return parseInt(b.likes) - parseInt(a.likes)
   }
@@ -28,47 +38,24 @@ const App = () => {
     state.blogs.sort(byLikes)
   )
 
+  const users = useSelector(state =>
+    state.users)
+
+  const user = useSelector(state => state.user)
+
   const [username, setUsername] = useState('')
   const [password, setPassword] = useState('')
-  const [user, setUser] = useState(null)
 
   const blogFormRef = useRef()
 
-  useEffect(() => {
-    const loggedUserJSON = window.localStorage.getItem('loggedBlogappUser')
-    if (loggedUserJSON) {
-      const user = JSON.parse(loggedUserJSON)
-      setUser(user)
-      blogService.setToken(user.token)
-    }
-  }, [])
-
+  //login logout
   const handleLogin = async (event) => {
     event.preventDefault()
-
-    try {
-      const user = await loginService.login({
-        username,
-        password
-      })
-
-
-      blogService.setToken(user.token)
-      window.localStorage.setItem(
-        'loggedBlogappUser', JSON.stringify(user)
-      )
-      setUser(user)
-      setUsername('')
-      setPassword('')
-
-    } catch (exception) {
-      dispatch(setNotification('Invalid username or password', 'red'))
-    }
+    dispatch(logIn(username, password))
   }
 
-  const handleLogout = async () => {
-    window.localStorage.removeItem('loggedBlogappUser')
-    window.location.reload(false)
+  const handleLogout = () => {
+    dispatch(logOut())
   }
 
   const loginForm = () => {
@@ -87,23 +74,22 @@ const App = () => {
   //Map blogs for display
   const blogMapper = () => (
     blogs.map(blog =>
-      <Blog key={blog.id} blog={blog} updateBlog={updateBlog} removeBlog={removeBlog} user={user.name} />
+      <BlogRedux key={blog.id} blog={blog} poster={user.name} />
+
     )
   )
 
-  const updateBlog = (blogObject, id) => {
-    blogService.update(blogObject, id)
-      .then(returnedBlog => {
-        setBlogs(blogs.map(blog => blog.id !== id ? blog : returnedBlog))
-      })
-  }
-
-  const removeBlog = (id) => {
-    blogService.remove(id, user.token)
-      .then(setBlogs(blogs.filter(blog => blog.id !== id))
-      )
-      dispatch(setNotification(`Blog removed succesfully`, 'green'))
-  }
+  //Map users for display
+  const userMapper = () => (
+    <table>
+      <tbody>
+       <tr><th><h2>Users</h2></th><th><h3>Blogs created</h3></th></tr>
+    {users.map(user => 
+      <Users key={user.id} name={user.name} blogs={user.blogs} />
+      )}
+      </tbody>
+      </table>
+  )
 
   const blogForm = () => {
     return(
@@ -112,12 +98,15 @@ const App = () => {
       </Togglable>
     )}
 
+    const userStyle = {
+      marginLeft: 200,
+  }
+
+//TABLE
   //Display
   return(
     <div>
-      <NotificationRedux/>
-
-      {user === null
+      <div>{user === null
         ? <h1>Login to application</h1> : null}
 
       {user === null
@@ -135,6 +124,19 @@ const App = () => {
           {blogForm()}
           {blogMapper()}
         </div>}
+        </div>
+        
+      <Router>
+        <Switch>
+        <Route path='/users'>
+          {userMapper()}
+          </Route>
+        
+        <Route path='/'>
+      <NotificationRedux/>
+        </Route>
+        </Switch>
+      </Router>
     </div>
   )
 
