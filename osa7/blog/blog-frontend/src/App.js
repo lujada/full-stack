@@ -14,8 +14,11 @@ import { logIn, logOut } from './reducers/loginReducer'
 import { initializeUsers } from './reducers/userReducer'
 import NotificationRedux from './components/NotificationRedux'
 import BlogFormRedux from './components/blogFormRedux'
-import { BrowserRouter as Router, Switch, Route, Link } from 'react-router-dom'
+import { BrowserRouter as Router, Switch, Route, Link, useParams, useHistory } from 'react-router-dom'
 import Users from './components/Users'
+import User from './components/User'
+import BlogRender from './components/BlogRender'
+import BlogRedux2 from './components/BlogRedux2'
 
 const App = () => {
   const dispatch = useDispatch()
@@ -37,6 +40,7 @@ const App = () => {
   const blogs = useSelector(state => 
     state.blogs.sort(byLikes)
   )
+
 
   const users = useSelector(state =>
     state.users)
@@ -74,8 +78,7 @@ const App = () => {
   //Map blogs for display
   const blogMapper = () => (
     blogs.map(blog =>
-      <BlogRedux key={blog.id} blog={blog} poster={user.name} />
-
+      <BlogRender key={blog.id} blog={blog} />
     )
   )
 
@@ -85,11 +88,12 @@ const App = () => {
       <tbody>
        <tr><th><h2>Users</h2></th><th><h3>Blogs created</h3></th></tr>
     {users.map(user => 
-      <Users key={user.id} name={user.name} blogs={user.blogs} />
+      <Users key={user.id} name={user.name} blogs={user.blogs} id={user.id} />
       )}
       </tbody>
       </table>
   )
+  
 
   const blogForm = () => {
     return(
@@ -98,45 +102,61 @@ const App = () => {
       </Togglable>
     )}
 
-    const userStyle = {
-      marginLeft: 200,
+  //Display
+
+  const padding = {
+    padding: 5,
+    background: 'silver'
   }
 
-//TABLE
-  //Display
   return(
     <div>
-      <div>{user === null
-        ? <h1>Login to application</h1> : null}
+
+      <div>
+        <Link style={padding} to='/'>home</Link>
+        <Link style={padding} to='/blogs'>blogs</Link>
+        <Link style={padding} to='/users'>users</Link>
+        
+      {user !== null ? <div><em>{user.username} logged in</em> <button onClick={handleLogout}>
+          Logout
+          </button> </div> : ''}
+          </div>
+
+      <div>
+        {user === null
+        ? <h1>Login to application</h1> : ''}
 
       {user === null
         ? loginForm()
-        :
-        <div>
-          <h1>Blogs</h1>
-          <p>{user.username} logged in</p>
-
-          <button onClick={handleLogout}>
-          Logout
-          </button>
-          <p></p>
-
-          {blogForm()}
-          {blogMapper()}
-        </div>}
+        : ''}
         </div>
         
-      <Router>
         <Switch>
+
+        <Route path='/users/:id'>
+          <User users={users} />
+        </Route>
+
         <Route path='/users'>
           {userMapper()}
           </Route>
         
+        <Route path='/blogs/:id'>
+          <BlogRedux2 blogs={blogs} user={user} />
+        </Route>
+
+        <Route path='/blogs'>
+        <h1>Blogs</h1>
+        {user === null ? null : blogForm()}
+        {blogMapper()}
+        </Route>
+        
         <Route path='/'>
+          <h1>Blog App</h1>
+          <p>Navigate by using the menu</p>
       <NotificationRedux/>
         </Route>
         </Switch>
-      </Router>
     </div>
   )
 

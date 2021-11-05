@@ -1,17 +1,21 @@
 /*eslint-disable*/
 import React from 'react'
+import { Link } from 'react-router-dom'
 
-const Users = ( { name, blogs } ) => {
+
+const Users = ( { name, blogs, id } ) => {
   let blogAmount = blogs.length
   return(
-      <tr>
+    
+     <tr>
       <td>
-      {name}
+      <Link to={`/users/${id}`}>{name}</Link>
       </td>
       <td>
       {blogAmount}
       </td>
       </tr>
+      
       
     
   )

@@ -4,9 +4,12 @@ import { useDispatch } from 'react-redux'
 import { createBlog } from '../reducers/blogReducer'
 import useField from '../hooks/index'
 import { setNotification } from '../reducers/notificationReducer'
+import { useHistory } from 'react-router'
 
 const BlogFormRedux = () => {
   const dispatch = useDispatch()
+
+  const history = useHistory()
 
     const {reset: resetTitle, ...title} = useField('text')
     const {reset: resetAuthor, ...author} = useField('text')
@@ -31,6 +34,8 @@ const BlogFormRedux = () => {
       dispatch(createBlog(blog))
       dispatch(setNotification(`A new blog ${title.value} by ${author.value} added`, 'green'))
       reset(event)
+
+      history.push('/')
     }
 
   return(

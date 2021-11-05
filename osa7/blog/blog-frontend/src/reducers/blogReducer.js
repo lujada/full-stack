@@ -1,7 +1,11 @@
 /*eslint-disable*/
+import { useState } from 'react'
 import blogService from '../services/blogs'
+import commentService from '../services/comments'
+
 
 const blogReducer = (state = [], action) => {
+
     switch(action.type) {
         case 'INIT_BLOGS':
             return action.data
@@ -16,6 +20,22 @@ const blogReducer = (state = [], action) => {
             likedBlog.likes = likedBlog.likes +1
             
             return state.map(blog => blog.id !== blogId ? blog : likedBlog)
+        case 'ADD_COMMENT':
+           const blogToComment = action.data.response.blog
+
+           const comment = action.data.response.content
+            const commentId = action.data.response.id
+
+            let commentData = {content: comment, id: commentId}
+
+            let commentedBlog = state.filter(blog => blog.id === blogToComment)
+            
+                        const updatedBlog = {...commentedBlog[0], comments: [...commentedBlog[0].comments, commentData]}
+                        console.log(updatedBlog, 'updated')
+               return state.map(blog => blog.id !== updatedBlog.id ? blog : updatedBlog)
+
+            
+
         default:
             return state
     }
@@ -64,6 +84,17 @@ export const likeBlog = (blogObject, id, oldBlogObject) => {
                 id: id
             }
         })
+    }
+}
+
+export const dispatchComment = (comment) => {
+    return async (dispatch) => {
+        await commentService.create(comment)
+        .then(response => 
+        dispatch({  
+                type: 'ADD_COMMENT',
+                data: { response }
+        }))
     }
 }
 
