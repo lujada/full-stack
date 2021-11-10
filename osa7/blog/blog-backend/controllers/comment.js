@@ -3,21 +3,18 @@ const Comment = require('../models/comment')
 const Blog = require('../models/blog')
 
 commentRouter.get('/', async (request, response, next) => {
-    const comments = await Comment.find({}).populate('blog', {title: 1, id: 1})
+    const comments = await Comment.find({})
     response.json(comments.map(comment => comment.toJSON()))
 })
 
 commentRouter.post('/', async (request, response, next) => {
-    console.log(request, 'body')
     const comment = new Comment(request.body)
-    console.log(comment, 'comment')
 
     const savedComment = await comment.save()
     const blog = await Blog.findById(request.body.blog)
 
-    blog.comments = blog.comments.concat(savedComment._id)
+    blog.comments = blog.comments.concat(savedComment.content)
     await blog.save()
-
 
     response.status(201).json(savedComment)
 })

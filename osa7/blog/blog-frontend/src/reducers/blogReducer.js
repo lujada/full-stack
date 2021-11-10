@@ -1,5 +1,4 @@
 /*eslint-disable*/
-import { useState } from 'react'
 import blogService from '../services/blogs'
 import commentService from '../services/comments'
 
@@ -21,17 +20,13 @@ const blogReducer = (state = [], action) => {
             
             return state.map(blog => blog.id !== blogId ? blog : likedBlog)
         case 'ADD_COMMENT':
+
            const blogToComment = action.data.response.blog
-
            const comment = action.data.response.content
-            const commentId = action.data.response.id
-
-            let commentData = {content: comment, id: commentId}
 
             let commentedBlog = state.filter(blog => blog.id === blogToComment)
             
-                        const updatedBlog = {...commentedBlog[0], comments: [...commentedBlog[0].comments, commentData]}
-                        console.log(updatedBlog, 'updated')
+                        const updatedBlog = {...commentedBlog[0], comments: [...commentedBlog[0].comments, comment]}
                return state.map(blog => blog.id !== updatedBlog.id ? blog : updatedBlog)
 
             

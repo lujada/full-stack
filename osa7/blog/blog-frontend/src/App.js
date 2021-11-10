@@ -14,7 +14,7 @@ import { logIn, logOut } from './reducers/loginReducer'
 import { initializeUsers } from './reducers/userReducer'
 import NotificationRedux from './components/NotificationRedux'
 import BlogFormRedux from './components/blogFormRedux'
-import { BrowserRouter as Router, Switch, Route, Link, useParams, useHistory } from 'react-router-dom'
+import { BrowserRouter as Router, Switch, Route, Link, useParams, useHistory, Redirect } from 'react-router-dom'
 import Users from './components/Users'
 import User from './components/User'
 import BlogRender from './components/BlogRender'
@@ -113,10 +113,12 @@ const App = () => {
     <div>
 
       <div>
+        {user ? <div>
         <Link style={padding} to='/'>home</Link>
         <Link style={padding} to='/blogs'>blogs</Link>
         <Link style={padding} to='/users'>users</Link>
-        
+        </div> : ''
+          }
       {user !== null ? <div><em>{user.username} logged in</em> <button onClick={handleLogout}>
           Logout
           </button> </div> : ''}
@@ -142,13 +144,17 @@ const App = () => {
           </Route>
         
         <Route path='/blogs/:id'>
-          <BlogRedux2 blogs={blogs} user={user} />
+          {user ? <BlogRedux2 blogs={blogs} user={user} /> : <Redirect to="/" />}
         </Route>
 
         <Route path='/blogs'>
+          {user ? <div>
         <h1>Blogs</h1>
-        {user === null ? null : blogForm()}
+        {blogForm()}
         {blogMapper()}
+         </div>
+        : <Redirect to='/' />
+          }
         </Route>
         
         <Route path='/'>

@@ -29,7 +29,7 @@ const BlogRedux2 = ({ blogs, user }) => {
     const username = user.username
 
     const mapComments = () => blog.comments.map(comment => 
-     <CommentMapper key={comment.id} content={comment.content} />
+     <CommentMapper key={comment} content={comment} />
     )
 
 
