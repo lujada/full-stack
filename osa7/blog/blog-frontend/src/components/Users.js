@@ -1,4 +1,3 @@
-/*eslint-disable*/
 import React from 'react'
 import { Link } from 'react-router-dom'
 
@@ -6,18 +5,14 @@ import { Link } from 'react-router-dom'
 const Users = ( { name, blogs, id } ) => {
   let blogAmount = blogs.length
   return(
-    
-     <tr>
+    <tr>
       <td>
-      <Link to={`/users/${id}`}>{name}</Link>
+        <Link to={`/users/${id}`}>{name}</Link>
       </td>
       <td>
-      {blogAmount}
+        {blogAmount}
       </td>
-      </tr>
-      
-      
-    
+    </tr>
   )
 
 }

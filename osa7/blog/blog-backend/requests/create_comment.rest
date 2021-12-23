@@ -1,4 +1,4 @@
-POST http://localhost:3003/api/comments
+POST http://localhost:3003/api/localhost:3003/api/comments
 Content-Type: application/json
 
 {

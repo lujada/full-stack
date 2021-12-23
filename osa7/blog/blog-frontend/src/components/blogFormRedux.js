@@ -1,4 +1,3 @@
-/*eslint-disable*/
 import React from 'react'
 import { useDispatch } from 'react-redux'
 import { createBlog } from '../reducers/blogReducer'
@@ -11,32 +10,32 @@ const BlogFormRedux = () => {
 
   const history = useHistory()
 
-    const {reset: resetTitle, ...title} = useField('text')
-    const {reset: resetAuthor, ...author} = useField('text')
-    const {reset: resetUrl, ...url} = useField('text')
+  const { reset: resetTitle, ...title } = useField('text')
+  const { reset: resetAuthor, ...author } = useField('text')
+  const { reset: resetUrl, ...url } = useField('text')
 
-    const reset = (event) => {
-      event.preventDefault()
+  const reset = (event) => {
+    event.preventDefault()
 
-      resetTitle(event)
-      resetAuthor(event)
-      resetUrl(event)
+    resetTitle(event)
+    resetAuthor(event)
+    resetUrl(event)
+  }
+
+  const handleSubmit = (event) => {
+    event.preventDefault()
+
+    let blog = {
+      title: title.value,
+      author: author.value,
+      url: url.value
     }
+    dispatch(createBlog(blog))
+    dispatch(setNotification(`A new blog ${title.value} by ${author.value} added`, 'green'))
+    reset(event)
 
-    const handleSubmit = (event) => {
-      event.preventDefault()
-
-      let blog = {
-        title: title.value,
-        author: author.value,
-        url: url.value
-      }
-      dispatch(createBlog(blog))
-      dispatch(setNotification(`A new blog ${title.value} by ${author.value} added`, 'green'))
-      reset(event)
-
-      history.push('/')
-    }
+    history.push('/')
+  }
 
   return(
     <div>

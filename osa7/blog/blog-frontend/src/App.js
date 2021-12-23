@@ -1,24 +1,19 @@
-/*eslint-disable*/
 import React, { useState, useEffect, useRef } from 'react'
 import { useSelector, useDispatch } from 'react-redux'
-//import Blog from './components/Blog'
-import BlogRedux from './components/BlogRedux'
-import blogService from './services/blogs'
-import loginService from './services/login'
 import LoginForm from './components/loginForm'
-//import BlogForm from './components/blogForm'
 import Togglable from './components/Togglable'
-import { setNotification } from './reducers/notificationReducer'
 import { initializeBlogs } from './reducers/blogReducer'
 import { logIn, logOut } from './reducers/loginReducer'
 import { initializeUsers } from './reducers/userReducer'
 import NotificationRedux from './components/NotificationRedux'
 import BlogFormRedux from './components/blogFormRedux'
-import { BrowserRouter as Router, Switch, Route, Link, useParams, useHistory, Redirect } from 'react-router-dom'
+import { Switch, Route, Link, Redirect } from 'react-router-dom'
 import Users from './components/Users'
 import User from './components/User'
-import BlogRender from './components/BlogRender'
-import BlogRedux2 from './components/BlogRedux2'
+//import BlogRender from './components/BlogRender'
+import BlogRedux from './components/BlogRedux2'
+
+import { Table } from 'react-bootstrap'
 
 const App = () => {
   const dispatch = useDispatch()
@@ -37,7 +32,7 @@ const App = () => {
   const byLikes = (a, b) => {
     return parseInt(b.likes) - parseInt(a.likes)
   }
-  const blogs = useSelector(state => 
+  const blogs = useSelector(state =>
     state.blogs.sort(byLikes)
   )
 
@@ -73,27 +68,43 @@ const App = () => {
           handleSubmit={handleLogin}
         />
       </Togglable>
-    )}
+    )
+  }
 
   //Map blogs for display
+
   const blogMapper = () => (
-    blogs.map(blog =>
-      <BlogRender key={blog.id} blog={blog} />
-    )
+    <div>
+      <Table striped>
+        <tbody>
+          {blogs.map(blog =>
+            <tr key={blog.id}>
+              <td>
+                <Link to={`/blogs/${blog.id}`}>{blog.title}
+                </Link>
+              </td>
+              <td>
+                {blog.user.username}
+              </td>
+            </tr>
+          )}
+        </tbody>
+      </Table>
+    </div>
   )
 
   //Map users for display
   const userMapper = () => (
     <table>
       <tbody>
-       <tr><th><h2>Users</h2></th><th><h3>Blogs created</h3></th></tr>
-    {users.map(user => 
-      <Users key={user.id} name={user.name} blogs={user.blogs} id={user.id} />
-      )}
+        <tr><th><h>Users</h></th><th><h3>Blogs created</h3></th></tr>
+        {users.map(user =>
+          <Users key={user.id} name={user.name} blogs={user.blogs} id={user.id} />
+        )}
       </tbody>
-      </table>
+    </table>
   )
-  
+
 
   const blogForm = () => {
     return(
@@ -110,30 +121,30 @@ const App = () => {
   }
 
   return(
-    <div>
+    <div className="container">
 
       <div>
         {user ? <div>
-        <Link style={padding} to='/'>home</Link>
-        <Link style={padding} to='/blogs'>blogs</Link>
-        <Link style={padding} to='/users'>users</Link>
+          <Link style={padding} to='/'>home</Link>
+          <Link style={padding} to='/blogs'>blogs</Link>
+          <Link style={padding} to='/users'>users</Link>
         </div> : ''
-          }
-      {user !== null ? <div><em>{user.username} logged in</em> <button onClick={handleLogout}>
+        }
+        {user !== null ? <div><em>{user.username} logged in</em> <button onClick={handleLogout}>
           Logout
-          </button> </div> : ''}
-          </div>
+        </button> </div> : ''}
+      </div>
 
       <div>
         {user === null
-        ? <h1>Login to application</h1> : ''}
+          ? <h1>Login to application</h1> : ''}
 
-      {user === null
-        ? loginForm()
-        : ''}
-        </div>
-        
-        <Switch>
+        {user === null
+          ? loginForm()
+          : ''}
+      </div>
+
+      <Switch>
 
         <Route path='/users/:id'>
           <User users={users} />
@@ -141,28 +152,28 @@ const App = () => {
 
         <Route path='/users'>
           {userMapper()}
-          </Route>
-        
+        </Route>
+
         <Route path='/blogs/:id'>
-          {user ? <BlogRedux2 blogs={blogs} user={user} /> : <Redirect to="/" />}
+          {user ? <BlogRedux blogs={blogs} user={user} /> : <Redirect to="/" />}
         </Route>
 
         <Route path='/blogs'>
           {user ? <div>
-        <h1>Blogs</h1>
-        {blogForm()}
-        {blogMapper()}
-         </div>
-        : <Redirect to='/' />
+            <h1>Blogs</h1>
+            {blogForm()}
+            {blogMapper()}
+          </div>
+            : <Redirect to='/' />
           }
         </Route>
-        
+
         <Route path='/'>
           <h1>Blog App</h1>
           <p>Navigate by using the menu</p>
-      <NotificationRedux/>
+          <NotificationRedux/>
         </Route>
-        </Switch>
+      </Switch>
     </div>
   )
 
