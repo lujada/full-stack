@@ -1,6 +1,6 @@
 import React, { useState } from 'react'
 import { useMutation, useQuery } from '@apollo/client'
-import { ALL_AUTHORS, EDIT_BDATE } from '../queries'
+import { ALL_AUTHORS, EDIT_AUTHOR } from '../queries'
 
 const Authors = (props) => {
   const result = useQuery(ALL_AUTHORS)
@@ -8,15 +8,17 @@ const Authors = (props) => {
   const [name, setName] = useState('')
   let [born, setBorn] = useState('')
 
-  const [ editBdate ] = useMutation(EDIT_BDATE, {
+  const [ editAuthor ] = useMutation(EDIT_AUTHOR, {
     refetchQueries: [ {query:ALL_AUTHORS} ]
   })
 
   const submit = (event) => {
     event.preventDefault()
 
-    let setBornTo = parseInt(born)
-    editBdate({ variables: { name, setBornTo }})
+    born = parseInt(born)
+    const findAuthorId = result.data.allAuthors.find(author => author.name === name)
+    let id = findAuthorId.id
+    editAuthor({ variables: { id, born }})
 
     setName('')
     setBorn('')
@@ -65,6 +67,8 @@ const Authors = (props) => {
         </tbody>
       </table>
 
+
+    {props.token ?
       <div>
         <h2>Set birthyear</h2>
         <form onSubmit={submit}>
@@ -86,10 +90,13 @@ const Authors = (props) => {
 
         </form>
       </div>
+  :
+  ''
+  }
 
     </div>
   )
-            }
+}
 }
 
 export default Authors
