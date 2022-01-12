@@ -97,7 +97,7 @@ const resolvers = {
     },
 
     me: (root, args, context) => {
-      return context.currentUser  
+      return context.currentUser 
     }
 
     },
@@ -148,6 +148,7 @@ const resolvers = {
     },
 
     editAuthor: async (root, args, context) => {
+      
       if (!context.currentUser)
       {
         return new AuthenticationError("Not authenticated")
@@ -167,14 +168,16 @@ const resolvers = {
     },
 
     createUser: async (root, args) => {
-      const user = new User({username: args.username})
+      const user = new User({username: args.username, favoriteGenre: args.favoriteGenre})
+      console.log(user)
 
-      return user.save()
+      await user.save()
       .catch(error => {
         throw new UserInputError(error.message, {
           invalidArgs: args,
         })
       })
+      return user
     }, 
 
     login: async (root, args) => {
