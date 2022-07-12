@@ -1,6 +1,16 @@
+interface weightHeight {
+    height: number;
+    weight: number;
+}
 
+const parseValues = (args: Array<string>): weightHeight => {
+    return {
+    height: Number(args[2]),
+    weight: Number(args[3])
+    }
+}
 
-const calculateBmi = (height: number, weight: number) => {
+const calculateBmi = (height: number, weight: number): string => {
     const bmi = weight / ((height / 100) ** 2)
 
     if (bmi < 18.5) {
@@ -16,6 +26,6 @@ const calculateBmi = (height: number, weight: number) => {
 }
 
 
-
-console.log(calculateBmi(165, 100))
+const {height, weight} = parseValues(process.argv)
+console.log(calculateBmi(height, weight))
 

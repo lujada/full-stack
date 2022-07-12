@@ -10,6 +10,15 @@ rating: number;
 ratingDescription: string;
 }
 
+const parseExerciseValues = (args: Array<string>) => {
+  let lastIndex = args.length - 1
+  let excerciseHoursStr = args.slice(2, lastIndex)
+  let excerciseHours = excerciseHoursStr.map(value => Number(value))
+  let targetValue = Number(args[lastIndex])
+
+  return exerciseCalculator(excerciseHours, targetValue)
+}
+
 const periodLength = (values: Array<number>): number => {
     return values.length
 }
@@ -54,6 +63,7 @@ const describeRating = (value: number): string => {
 }
 
 const exerciseCalculator = (excerciseHours: Array<number>, target: number): valueInterface => {
+  console.log(excerciseHours, target, 'in excal')
   let sum = excerciseHours.reduce((partialSum, a) => partialSum + a, 0);
   let average = sum/excerciseHours.length
 
@@ -72,5 +82,5 @@ const exerciseCalculator = (excerciseHours: Array<number>, target: number): valu
 
 }
 
-console.log(exerciseCalculator([3, 0, 2, 4.5, 0, 3, 1], 2))
+console.log(parseExerciseValues(process.argv))
 
